@@ -9,7 +9,7 @@ class GameParameters:
             cards_on_deck = 45,
             cards_on_hand = 5,
             crystal_positions = [(1, 2), (3, 1)],
-            forward_model: "rl.ForwardModel" = rl.SimpleForwardModel()) -> None:
+            forward_model: 'rl.ForwardModel' = rl.SimpleForwardModel()) -> None:
         self.board_size = board_size
         self.action_points_per_turn = action_points_per_turn
         self.cards_on_deck = cards_on_deck

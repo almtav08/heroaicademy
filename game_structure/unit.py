@@ -1,11 +1,11 @@
 from typing import Tuple, List
 from copy import deepcopy
-from game_structure import Card
+import game_structure as gs
 
 class Unit:
     def __init__(
         self,
-        card: 'Card',
+        card: 'gs.Card',
         hp: int,
         max_hp: int,
         speed: int,
@@ -13,7 +13,7 @@ class Unit:
         range: int,
         resistance: int,
         pos: Tuple[int, int],
-        equipement: List['Card']
+        equipement: List['gs.Card']
     ) -> None:
         """Unit is a base class for all units that a player can use in the game."""
         self.card = card
@@ -55,7 +55,7 @@ class Unit:
 # endregion
 
 # region Getters
-    def get_card(self) -> 'Card':
+    def get_card(self) -> 'gs.Card':
         """Get unit card."""
         return self.card
 
@@ -87,7 +87,7 @@ class Unit:
         """Get unit resistance."""
         return self.resistance
     
-    def get_equipement(self) -> List['Card']:
+    def get_equipement(self) -> List['gs.Card']:
         """Get unit equipement."""
         return self.equipement
 # endregion

@@ -1,5 +1,5 @@
 from players import Player
-from game_structure import Observation, Action
+import game_structure as gs
 
 class RandomPlayer(Player):
     def __init__(self):
@@ -7,7 +7,7 @@ class RandomPlayer(Player):
         super().__init__()
 
 # region Methods
-    def think(self, observation: 'Observation', budget: float) -> 'Action':
+    def think(self, observation: 'gs.Observation', budget: float) -> 'gs.Action':
         """Think about the next action to take."""
         return observation.get_random_action()
 # endregion

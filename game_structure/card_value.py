@@ -1,5 +1,5 @@
 from enum import Enum
-from game_structure import CardType
+import game_structure as gs
 
 class CardValue(Enum):
     """CardValue enum represents the value of the card."""
@@ -32,11 +32,11 @@ class CardValue(Enum):
         """Return True if the card value is a crystal value."""
         return self.value == 12
 
-    def get_card_type(self) -> 'CardType':
+    def get_card_type(self) -> 'gs.CardType':
         """Return the card type of the card value."""
         if self.is_unit_value():
-            return CardType.UNIT
+            return gs.CardType.UNIT
         if self.is_spell_value():
-            return CardType.SPELL
+            return gs.CardType.SPELL
         if self.is_item_value():
-            return CardType.ITEM
+            return gs.CardType.ITEM

@@ -1,5 +1,5 @@
 from players import Player
-from game_structure import Observation, Action
+import game_structure as gs
 
 class HumanPlayer(Player):
     """Player class implemented for human players."""
@@ -7,7 +7,7 @@ class HumanPlayer(Player):
         super().__init__()
 
 # region Methods
-    def think(self, observation: 'Observation', budget: float) -> 'Action':
+    def think(self, observation: 'gs.Observation', budget: float) -> 'gs.Action':
         """Think about the next action to take."""
         actions = observation.get_actions()
         for i, action in enumerate(actions):

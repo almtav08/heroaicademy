@@ -1,7 +1,7 @@
-from game_structure import CardType, CardValue, UnitsCollection
+import game_structure as gs
 
 class Card:
-    def __init__(self, value: 'CardValue', card_type: 'CardType'):
+    def __init__(self, value: 'gs.CardValue', card_type: 'gs.CardType'):
         """Card is a base class for all cards that a player can use in the game."""
         self.value = value
         self.card_type = card_type
@@ -18,17 +18,17 @@ class Card:
 # endregion
 
 # region Getters
-    def get_value(self) -> 'CardValue':
+    def get_value(self) -> 'gs.CardValue':
         """Get value."""
         return self.value
     
-    def get_card_type(self) -> 'CardType':
+    def get_card_type(self) -> 'gs.CardType':
         """Get card type."""
         return self.card_type
 # endregion
 
 # region Helpers
-    def is_playable(self, units: 'UnitsCollection') -> bool:
+    def is_playable(self, units: 'gs.UnitsCollection') -> bool:
         """Check if card is playable."""
         return self.value.is_unit_value() or self.value.is_spell_value() or (self.value.is_item_value() and len(units.get_available_units()) > 0)
 # endregion

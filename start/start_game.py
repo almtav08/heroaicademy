@@ -1,12 +1,11 @@
 from typing import List, Tuple
-import game_structure as gs
 from game_structure import GameParameters, Game
 from game_structure.rules import SimpleForwardModel
 from players import Player, OEPlayer, MCTSPlayer, OSLAPlayer
 from heuristics import SimpleHeuristic
 import players as pl
 
-def start_game() -> Tuple["gs.Game", List[Player]]:
+def start_game() -> Tuple['Game', List[Player]]:
     forward_model = SimpleForwardModel()
     parameters = GameParameters()
     parameters.forward_model = forward_model

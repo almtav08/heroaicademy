@@ -1,9 +1,9 @@
 from typing import Tuple, Union
 from copy import deepcopy
-from game_structure import Unit, Card
+import game_structure as gs
 
 class Action:
-    def __init__(self, subject: Union['Unit', 'Card'], unit: 'Unit' = None, position: Tuple[int, int] = None) -> None:
+    def __init__(self, subject: Union['gs.Unit', 'gs.Card'], unit: 'gs.Unit' = None, position: Tuple[int, int] = None) -> None:
         """Actions stand for every possible action that can be taken per turn."""
         self.subject = subject
         self.unit = unit
@@ -22,11 +22,11 @@ class Action:
 # endregion
 
 # region Getters
-    def get_subject(self) -> Union['Unit', 'Card']:
+    def get_subject(self) -> Union['gs.Unit', 'gs.Card']:
         """Return subject."""
         return self.subject
 
-    def get_unit(self) -> 'Unit':
+    def get_unit(self) -> 'gs.Unit':
         """Return option."""
         return self.unit
 

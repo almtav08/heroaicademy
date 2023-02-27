@@ -1,6 +1,6 @@
 from heuristics import Heuristic
 from players import Player
-from game_structure import Observation, Action
+import game_structure as gs
 import math
 
 class OSLAPlayer(Player):
@@ -9,7 +9,7 @@ class OSLAPlayer(Player):
         self.heuristic = heuristic
 
 # region Methods
-    def think(self, observation: 'Observation', budget: float) -> 'Action':
+    def think(self, observation: 'gs.Observation', budget: float) -> 'gs.Action':
         """Think about the next action to take."""
         best_reward = -math.inf
         best_action = None

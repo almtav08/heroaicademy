@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
-from game_structure import Observation, Action
+import game_structure as gs
 
 class Player(ABC):
 
     @abstractmethod
-    def think(self, observation: 'Observation', budget: float) -> 'Action':
+    def think(self, observation: 'gs.Observation', budget: float) -> 'gs.Action':
         pass
