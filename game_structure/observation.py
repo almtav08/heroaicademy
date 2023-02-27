@@ -89,7 +89,7 @@ class Observation:
 # endregion
 
 # region Getters
-    def get_actions(self) -> List['Action']:
+    def get_actions(self) -> List['gs.Action']:
         """Get all the possible actions for the current player."""
         actions = []
         units = self.player_0_units if self.current_turn == 0 else self.player_1_units
