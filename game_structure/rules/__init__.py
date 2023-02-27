@@ -1,0 +1,2 @@
+from game_structure.rules.forward_model import ForwardModel
+from game_structure.rules.simple_forward_model import SimpleForwardModel
