@@ -1,4 +1,4 @@
-from game_structure import CardType, CardValue
+from game_structure import CardType, CardValue, UnitsCollection
 
 class Card:
     def __init__(self, value: 'CardValue', card_type: 'CardType'):
@@ -25,6 +25,12 @@ class Card:
     def get_card_type(self) -> 'CardType':
         """Get card type."""
         return self.card_type
+# endregion
+
+# region Helpers
+    def is_playable(self, units: 'UnitsCollection') -> bool:
+        """Check if card is playable."""
+        return self.value.is_unit_value() or self.value.is_spell_value() or (self.value.is_item_value() and len(units.get_available_units()) > 0)
 # endregion
 
 # region Override

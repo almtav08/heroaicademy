@@ -1,6 +1,6 @@
 from typing import Tuple, List
 from copy import deepcopy
-from game_structure import Card, Resistance, Attack, Heal
+from game_structure import Card
 
 class Unit:
     def __init__(
@@ -10,10 +10,8 @@ class Unit:
         max_hp: int,
         speed: int,
         power: int,
-        resistance: 'Resistance',
-        attack: 'Attack',
-        heal: 'Heal',
-        swap: bool,
+        range: int,
+        resistance: int,
         pos: Tuple[int, int],
         equipement: List['Card']
     ) -> None:
@@ -23,10 +21,8 @@ class Unit:
         self.max_hp = max_hp
         self.speed = speed
         self.power = power
+        self.range = range
         self.resistance = resistance
-        self.attack = attack
-        self.heal = heal
-        self.swap = swap
         self.pos = pos
         self.equipement = equipement
 
@@ -39,10 +35,8 @@ class Unit:
             self.max_hp,
             self.speed,
             self.power,
-            self.resistance.clone(),
-            self.attack.clone(),
-            self.heal.clone(),
-            self.swap,
+            self.range,
+            self.resistance,
             self.pos,
             deepcopy(self.equipement)
         )
@@ -54,10 +48,8 @@ class Unit:
         other.max_hp = self.max_hp
         other.speed = self.speed
         other.power = self.power
-        other.resistance = self.resistance.clone()    
-        other.attack = self.attack.clone()
-        other.heal = self.heal.clone()
-        other.swap = self.swap
+        other.range = self.range
+        other.resistance = self.resistance   
         other.pos = self.pos
         other.equipement = deepcopy(self.equipement)
 # endregion
@@ -86,22 +78,14 @@ class Unit:
     def get_power(self) -> int:
         """Get unit power."""
         return self.power
+    
+    def get_range(self) -> int:
+        """Get unit range."""
+        return self.range
 
-    def get_resistance(self) -> 'Resistance':
+    def get_resistance(self) -> int:
         """Get unit resistance."""
         return self.resistance
-
-    def get_attack(self) -> 'Attack':
-        """Get unit attack."""
-        return self.attack
-
-    def get_heal(self) -> 'Heal':
-        """Get unit heal."""
-        return self.heal
-
-    def get_swap(self) -> bool:
-        """Get unit swap."""
-        return self.swap
     
     def get_equipement(self) -> List['Card']:
         """Get unit equipement."""
@@ -130,7 +114,12 @@ class Unit:
     
     def is_in_range(self, other: 'Unit') -> bool:
         """Check if the unit is in range of the other unit."""
-        return other.get_attack().get_range() >= abs(self.pos[0] - other.pos[0]) + abs(self.pos[1] - other.pos[1])
+        return other.get_range() >= abs(self.pos[0] - other.pos[0]) + abs(self.pos[1] - other.pos[1])
+    
+    def attack_unit(self, other: 'Unit') -> None:
+        """Attack other unit."""
+        damage = int(self.power * (100 - other.resistance) / 100)
+        other.set_hp(other.get_hp() - damage)
 # endregion
 
 # region Override
@@ -142,9 +131,6 @@ class Unit:
             f"Power: {self.power}\n"
             f"{self.card}\n"
             f"{self.resistance}\n"
-            f"{self.attack}\n"
-            f"{self.heal}\n"
-            f"Swap: {self.swap}\n"
             f"Pos: {self.pos}\n"
             f"Equipement: {self.equipement}"
         )

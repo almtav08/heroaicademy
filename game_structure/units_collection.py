@@ -62,6 +62,10 @@ class UnitsCollection:
     def get_unit_in_position(self, pos: Tuple[int, int]) -> 'Unit':
         """Return the unit in the given position."""
         return next((unit for unit in self.units if unit.pos == pos), None)
+    
+    def get_units_alive(self) -> List['Unit']:
+        """Return a list of all units that are not dead."""
+        return len(self.units)
 # endregion
 
 # region Helpers

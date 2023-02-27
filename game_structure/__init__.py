@@ -1,7 +1,3 @@
-from game_structure.resistance import Resistance
-from game_structure.attack import Attack
-from game_structure.attack_type import AttackType
-from game_structure.heal import Heal
 from game_structure.action import Action
 from game_structure.card_type import CardType
 from game_structure.card_value import CardValue

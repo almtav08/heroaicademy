@@ -109,6 +109,7 @@ class Observation:
                     actions.append(Action(unit.clone(), None, deepcopy(position)))
 
         for card in cards.get_cards():
+            actions.append(Action(card.clone(), None, None))
             if card.get_value() == CardValue.INFERNO:
                 for enemy in enemy_units.get_units():
                     actions.append(Action(card.clone(), None, deepcopy(enemy.get_pos())))
@@ -126,11 +127,16 @@ class Observation:
 
     def get_random_action(self) -> 'Action':
         """Gets a random action that is currently valid."""
-        option = random.randint(0, 1)
-        if option == 0:
+        move = bool(random.getrandbits(1))
+        if not move:
             # Play with a card
             cards = self.player_0_cards if self.current_turn == 0 else self.player_1_cards
             card = random.choice(cards.get_cards())
+
+            discard = bool(random.getrandbits(1))
+            if discard:
+                return Action(card.clone(), None, None)
+            
             if card.get_value() == CardValue.INFERNO:
                 enemy_units = self.player_1_units if self.current_turn == 0 else self.player_0_units
                 enemy = random.choice(enemy_units.get_units())
@@ -152,8 +158,8 @@ class Observation:
             units = self.player_0_units if self.current_turn == 0 else self.player_1_units
             unit = random.choice(units.get_available_units())
             if unit.get_card().get_value() == CardValue.CLERIC:
-                move = random.randint(0, 1)
-                if move == 0:
+                move = bool(random.getrandbits(1))
+                if not move:
                     # No move, heal
                     units = self.player_0_units if self.current_turn == 0 else self.player_1_units
                     target = random.choice(units.get_units_in_range(unit))
@@ -163,10 +169,10 @@ class Observation:
                     position = random.choice(unit.possible_moves(self.game_parameters.board_size))
                     return Action(unit.clone(), None, deepcopy(position))
             else:
-                move = random.randint(0, 1)
+                move = bool(random.getrandbits(1))
                 enemy_units = self.player_1_units if self.current_turn == 0 else self.player_0_units
                 enemies_in_range = enemy_units.get_units_in_range(unit)
-                if move == 0 and len(enemies_in_range) > 0:
+                if not move and len(enemies_in_range) > 0:
                     # No move, attack
                     target = random.choice(enemies_in_range)
                     return Action(unit.clone(), target.clone(), None)
