@@ -67,7 +67,9 @@ class Observation:
                 return False
             if action.get_unit() is None:
                 # Unit is moving
-                return action.get_position() in action.get_subject().possible_moves(self.game_parameters.board_size)
+                enemy_units = self.player_1_units if self.current_turn == 0 else self.player_0_units
+                return action.get_position() in action.get_subject().possible_moves(self.game_parameters.board_size) \
+                    and action.get_position() not in enemy_units.get_unit_positions()
             else:
                 # Unit is attacking or healing
                 units = self.player_0_units if self.current_turn == 0 else self.player_1_units
@@ -86,8 +88,10 @@ class Observation:
                     return action.get_position() in units.get_unit_positions()
                 else:
                     units = self.player_0_units if self.current_turn == 0 else self.player_1_units
+                    enemy_units = self.player_1_units if self.current_turn == 0 else self.player_0_units
                     player_1 = True if self.current_turn == 1 else False
-                    return action.get_position() in units.get_avalible_positions_for_spawn(player_1, self.game_parameters.board_size)
+                    return action.get_position() in units.get_avalible_positions_for_spawn(player_1, self.game_parameters.board_size) \
+                        and action.get_position() not in enemy_units.get_unit_positions()
             else:
                 # Equipment given to unit
                 units = self.player_0_units if self.current_turn == 0 else self.player_1_units
@@ -109,11 +113,14 @@ class Observation:
                     actions.append(gs.Action(unit.clone(), target.clone(), None))
                 for position in unit.possible_moves(self.game_parameters.board_size):
                     actions.append(gs.Action(unit.clone(), None, deepcopy(position)))
+                    if position not in enemy_units.get_unit_positions():
+                        actions.append(gs.Action(unit.clone(), None, deepcopy(position)))
             else:
                 for enemy in enemy_units.get_units_in_range(unit):
                     actions.append(gs.Action(unit.clone(), enemy.clone(), None))
                 for position in unit.possible_moves(self.game_parameters.board_size):
-                    actions.append(gs.Action(unit.clone(), None, deepcopy(position)))
+                    if position not in enemy_units.get_unit_positions():
+                        actions.append(gs.Action(unit.clone(), None, deepcopy(position)))
 
         for card in cards.get_cards():
             actions.append(gs.Action(card.clone(), None, None))
@@ -126,7 +133,8 @@ class Observation:
             elif card.get_value().is_unit_value():
                 player_1 = True if self.current_turn == 1 else False
                 for position in units.get_avalible_positions_for_spawn(player_1, self.game_parameters.board_size):
-                    actions.append(gs.Action(card.clone(), None, deepcopy(position)))
+                    if position not in enemy_units.get_unit_positions():
+                        actions.append(gs.Action(card.clone(), None, deepcopy(position)))
             else:
                 for unit in units.get_available_units():
                     actions.append(gs.Action(card.clone(), unit.clone(), None))
@@ -157,7 +165,11 @@ class Observation:
             elif card.get_value().is_unit_value():
                 units = self.player_0_units if self.current_turn == 0 else self.player_1_units
                 player_1 = True if self.current_turn == 1 else False
-                position = random.choice(units.get_avalible_positions_for_spawn(player_1, self.game_parameters.board_size))
+                spawns = units.get_avalible_positions_for_spawn(player_1, self.game_parameters.board_size)
+                position = random.choice(spawns)
+                enemy_units = self.player_1_units if self.current_turn == 0 else self.player_0_units
+                while position in enemy_units.get_unit_positions():
+                    position = random.choice(spawns)
                 return gs.Action(card.clone(), None, deepcopy(position))
             else:
                 units = self.player_0_units if self.current_turn == 0 else self.player_1_units
@@ -175,7 +187,11 @@ class Observation:
                     return gs.Action(unit.clone(), target.clone(), None)
                 else:
                 # Move
-                    position = random.choice(unit.possible_moves(self.game_parameters.board_size))
+                    moves = unit.possible_moves(self.game_parameters.board_size)
+                    position = random.choice(moves)
+                    enemy_units = self.player_1_units if self.current_turn == 0 else self.player_0_units
+                    while position in enemy_units.get_unit_positions():
+                        position = random.choice(moves)
                     return gs.Action(unit.clone(), None, deepcopy(position))
             else:
                 move = bool(random.getrandbits(1))
@@ -187,7 +203,11 @@ class Observation:
                     return gs.Action(unit.clone(), target.clone(), None)
                 else:
                 # Move
-                    position = random.choice(unit.possible_moves(self.game_parameters.board_size))
+                    moves = unit.possible_moves(self.game_parameters.board_size)
+                    position = random.choice(moves)
+                    enemy_units = self.player_1_units if self.current_turn == 0 else self.player_0_units
+                    while position in enemy_units.get_unit_positions():
+                        position = random.choice(moves)
                     return gs.Action(unit.clone(), None, deepcopy(position))
 # endregion
 

@@ -33,6 +33,8 @@ class CardCollection:
     
     def get_first_card(self) -> 'gs.Card':
         """Get the first card from the collection."""
+        if len(self.cards) == 0:
+            return None
         return self.cards.pop(0)
     
     def get_number_cards(self) -> bool:

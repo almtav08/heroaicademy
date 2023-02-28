@@ -40,6 +40,10 @@ class TurnGenome:
 
             # if no action was added, add a random one
             if not added:
+                try :
+                    self.actions[i] = observation.get_random_action()
+                except:
+                    print(self.actions)
                 self.actions[i] = observation.get_random_action()
 
             observation.game_parameters.forward_model.step(observation, self.actions[i])

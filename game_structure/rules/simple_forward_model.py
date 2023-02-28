@@ -29,12 +29,12 @@ class SimpleForwardModel(rl.ForwardModel):
                     target = enemy_units.get_unit_in_position(action.get_position())
                     if target is None:
                         return False
-                    target.set_hp(target.get_hp() - 200)
+                    target.set_hp(target.get_hp() - 400)
                 elif card.get_value() == gs.CardValue.HEAL_POTION:
                     target = units.get_unit_in_position(action.get_position())
                     if target is None:
                         return False
-                    target.set_hp(target.get_hp() + 100)
+                    target.set_hp(target.get_hp() + 300)
                 elif card.get_value().is_unit_value():
                     units.add_unit(create(card, action.get_position()))
                 else:
@@ -73,7 +73,9 @@ class SimpleForwardModel(rl.ForwardModel):
             player_cards = game_state.player_0_cards if game_state.current_turn == 0 else game_state.player_1_cards
             deck = game_state.player_0_deck if game_state.current_turn == 0 else game_state.player_1_deck
             while player_cards.get_number_cards() < game_state.game_parameters.cards_on_hand:
-                player_cards.add_card(deck.get_first_card())
+                card_add = deck.get_first_card()
+                if card_add is not None:
+                    player_cards.add_card(card_add)
             game_state.current_turn = (game_state.current_turn + 1) % 2
             game_state.action_points_left = game_state.game_parameters.action_points_per_turn
 
