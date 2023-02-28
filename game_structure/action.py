@@ -17,8 +17,10 @@ class Action:
     def copy_into(self, other: 'Action') -> None:
         """Deep copies the `Action` contents into another one."""
         other.subject = self.subject.clone()
-        other.unit = self.unit.clone()
-        other.position = deepcopy(self.position)
+        if self.unit is not None:
+            other.unit = self.unit.clone()
+        if self.position is not None:
+            other.position = deepcopy(self.position)
 # endregion
 
 # region Getters

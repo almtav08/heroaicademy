@@ -53,5 +53,6 @@ class CardCollection:
 # region Override
     def __str__(self) -> str:
         """Get a string representation of the collection."""
-        return f"CardCollection(cards={self.cards})"
+        cards_srt = ", ".join([str(card) for card in self.cards])
+        return f"CardCollection(cards={cards_srt})"
 # endregion

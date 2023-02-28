@@ -108,7 +108,7 @@ class Unit:
         moves = []
         for x in range(self.pos[0] - self.speed, self.pos[0] + self.speed + 1):
             for y in range(self.pos[1] - self.speed, self.pos[1] + self.speed + 1):
-                if x >= 0 and x < board_size[0] and y >= 0 or y < board_size[1]:
+                if x >= 0 and x < board_size[0] and y >= 0 and y < board_size[1]:
                     moves.append((x, y))
         return moves
     
@@ -126,12 +126,12 @@ class Unit:
     def __str__(self) -> str:
         """Return string representation of unit."""""
         return (
-            f"HP: {self.hp} / {self.max_hp}\n"
-            f"Speed: {self.speed}\n"
-            f"Power: {self.power}\n"
-            f"{self.card}\n"
-            f"{self.resistance}\n"
-            f"Pos: {self.pos}\n"
-            f"Equipement: {self.equipement}"
+            f"Unit[{self.card.get_value().name}, HP: {self.hp} / {self.max_hp}, POS: {self.pos}]"
+            #f"Speed: {self.speed}\n"
+            #f"Power: {self.power}\n"
+            #f"{self.card}\n"
+            #f"{self.resistance}\n"
+            #f"Pos: {self.pos}\n"
+            #f"Equipement: {self.equipement}"
         )
 # endregion

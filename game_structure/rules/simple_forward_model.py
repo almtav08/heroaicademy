@@ -11,34 +11,37 @@ class SimpleForwardModel(rl.ForwardModel):
 # region Methods
     def step(self, game_state: Union['gs.GameState', 'gs.Observation'], action: 'gs.Action') -> bool:
         """Perform an action on the game state."""
+        game_state.action_points_left -= 1
+
         if action is None:
             return False
         
         cards = game_state.player_0_cards if game_state.current_turn == 0 else game_state.player_1_cards
         units = game_state.player_0_units if game_state.current_turn == 0 else game_state.player_1_units
         enemy_units = game_state.player_1_units if game_state.current_turn == 0 else game_state.player_0_units
-        discard = game_state.player_0_discard if game_state.current_turn == 0 else game_state.player_1_discard
+        #discard = game_state.player_0_discard if game_state.current_turn == 0 else game_state.player_1_discard
 
         if type(action.get_subject()) is gs.Card:
             card = action.get_subject()
 
-            if card.get_value() == gs.CardValue.INFERNO:
-                target = enemy_units.get_unit_in_position(action.get_position())
-                if target is None:
-                    return False
-                target.set_hp(target.get_hp() - 200)
-            elif card.get_value() == gs.CardValue.HEAL_POTION:
-                target = units.get_unit_in_position(action.get_position())
-                if target is None:
-                    return False
-                target.set_hp(target.get_hp() + 100)
-            elif card.get_value().is_unit_value():
-                units.add_unit(create(card, action.get_position()))
-            else:
-                units.get_unit_in_position(action.get_unit().get_pos()).get_equipement().append(card)
-            
+            if action.get_unit() is not None or action.get_position() is not None:
+                if card.get_value() == gs.CardValue.INFERNO:
+                    target = enemy_units.get_unit_in_position(action.get_position())
+                    if target is None:
+                        return False
+                    target.set_hp(target.get_hp() - 200)
+                elif card.get_value() == gs.CardValue.HEAL_POTION:
+                    target = units.get_unit_in_position(action.get_position())
+                    if target is None:
+                        return False
+                    target.set_hp(target.get_hp() + 100)
+                elif card.get_value().is_unit_value():
+                    units.add_unit(create(card, action.get_position()))
+                else:
+                    units.get_unit_in_position(action.get_unit().get_pos()).get_equipement().append(card)
+
+            #discard.add_card(card)
             cards.remove_card(card)
-            discard.add_card(card)
             self.update_score(game_state)
             return True
         else:
@@ -89,13 +92,13 @@ class SimpleForwardModel(rl.ForwardModel):
         if game_state.current_turn == 0:
             current_hp = sum(map(lambda unit: unit.get_hp(), game_state.player_0_units.get_units()))
             enemy_hp = sum(map(lambda unit: unit.get_hp(), game_state.player_1_units.get_units()))
-            score = current_hp - enemy_hp
+            score = max((int((current_hp - enemy_hp) / 100)), 0)
             score += len(game_state.player_0_cards.get_playable_cards(game_state.player_0_units)) * 10
             game_state.player_0_score += score
         else:
             current_hp = sum(map(lambda unit: unit.get_hp(), game_state.player_1_units.get_units()))
             enemy_hp = sum(map(lambda unit: unit.get_hp(), game_state.player_0_units.get_units()))
-            score = current_hp - enemy_hp
+            score = max((int((current_hp - enemy_hp) / 100)), 0)
             score += len(game_state.player_1_cards.get_playable_cards(game_state.player_1_units)) * 10
             game_state.player_1_score += score
 # endregion    

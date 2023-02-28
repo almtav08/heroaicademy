@@ -93,6 +93,10 @@ class GameState:
         return (f"TURN: {self.current_turn!s}\n"
                 #f"BOARD: {self.board!s}\n"
                 f"SCORE P1: {self.player_0_score!s}\n"
+                f"CARDS P1: {self.player_0_cards!s}\n"
+                f"UNITS P1: {self.player_0_units!s}\n"
                 f"SCORE P2: {self.player_1_score!s}\n"
+                f"SCORE P2: {self.player_1_cards!s}\n"
+                f"UNITS P2: {self.player_1_units!s}\n"
                 f"ACTION POINTS LEFT: {self.action_points_left!s}")
 #endregion

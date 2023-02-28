@@ -36,5 +36,8 @@ class Card:
 # region Override
     def __str__(self) -> str:
         """Get string representation of card."""
-        return f"Card[{self.value.name}, {self.card_type.name}]"
+        return f"Card[{self.value.name}]"
+    
+    def __eq__(self, __o: object) -> bool:
+        return self.value.name == __o.value.name and self.card_type.name == __o.card_type.name
 # endregion

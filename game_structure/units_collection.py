@@ -48,16 +48,18 @@ class UnitsCollection:
 
     def get_available_units(self) -> List['gs.Unit']:
         """Get all units that are not dead."""
-        return [unit for unit in self.units if not unit.get_card().get_value().is_unit_value()]
+        return [unit for unit in self.units if unit.get_card().get_value().is_unit_value()]
         
     def get_units_in_range(self, other: 'gs.Unit') -> List['gs.Unit']:
         """Return a list of units in range of the unit."""
         return [unit for unit in self.units if unit.is_in_range(other)]
     
-    def get_avalible_positions_for_spawn(self) -> List[Tuple[int, int]]:
+    def get_avalible_positions_for_spawn(self, player_1 = False, board_size: Tuple[int, int] = None) -> List[Tuple[int, int]]:
         """Return a list of positions where a unit can be spawned."""
         taken_positions = self.get_unit_positions()
-        return [(x, y) for x in range(4) for y in range(4) if (x, y) not in taken_positions]
+        if player_1 and board_size is not None:
+            return [(x, y) for x in range(5) for y in range(board_size[1] - 4, board_size[1]) if (x, y) not in taken_positions]
+        return [(x, y) for x in range(5) for y in range(4) if (x, y) not in taken_positions]
     
     def get_unit_in_position(self, pos: Tuple[int, int]) -> 'gs.Unit':
         """Return the unit in the given position."""
@@ -77,5 +79,6 @@ class UnitsCollection:
 # region Override
     def __str__(self) -> str:
         """Get a string representation of the collection."""
-        return f"UnitsCollection(units={self.units})"
+        units_str = ", ".join([str(unit) for unit in self.units])
+        return f"UnitsCollection(units={units_str})"
 # endregion
