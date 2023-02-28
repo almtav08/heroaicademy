@@ -14,6 +14,6 @@ def create(card: 'gs.Card', position: Tuple[int, int]) -> 'gs.Unit':
     elif card.get_value() == gs.CardValue.NINJA:
         return gs.Unit(card.clone(), 700, 700, 3, 200, 1, 5, deepcopy(position), [])
     elif card.get_value() == gs.CardValue.CRYSTAL:
-        return gs.Unit(card.clone(), 4500, 4500, 0, 0, 0, 40, deepcopy(position), [])
+        return gs.Unit(card.clone(), 4500, 4500, 0, 0, 0, 30, deepcopy(position), [])
     else:
         return None

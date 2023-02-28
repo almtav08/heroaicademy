@@ -108,7 +108,7 @@ class Unit:
         moves = []
         for x in range(self.pos[0] - self.speed, self.pos[0] + self.speed + 1):
             for y in range(self.pos[1] - self.speed, self.pos[1] + self.speed + 1):
-                if x >= 0 and x < board_size[0] and y >= 0 and y < board_size[1]:
+                if x >= 0 and x < board_size[0] and y >= 0 and y < board_size[1] and (x, y) != self.pos:
                     moves.append((x, y))
         return moves
     

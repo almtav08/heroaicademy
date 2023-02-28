@@ -21,6 +21,8 @@ class OEPlayer(Player):
         if observation.action_points_left == observation.game_parameters.action_points_per_turn:
             self.turn.clear()
             self.compute_turn(observation, budget)
+        if len(self.turn) == 0:
+            return None
         return self.turn.pop(0)
 
     def compute_turn(self, observation: "gs.Observation", budget: float) -> None:
