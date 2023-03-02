@@ -12,15 +12,19 @@ class Action:
 # region Methods
     def clone(self) -> 'Action':
         """Create new action with the same unit and pos."""
-        return Action(self.subject.clone(), self.unit.clone(), deepcopy(self.position))
+        return Action(self.subject.clone(), self.unit.clone() if self.unit is not None else None, deepcopy(self.position) if self.position is not None else None)
 
     def copy_into(self, other: 'Action') -> None:
         """Deep copies the `Action` contents into another one."""
         other.subject = self.subject.clone()
         if self.unit is not None:
             other.unit = self.unit.clone()
+        else:
+            other.unit = None
         if self.position is not None:
             other.position = deepcopy(self.position)
+        else:
+            other.position = None
 # endregion
 
 # region Getters

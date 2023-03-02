@@ -28,9 +28,9 @@ class Card:
 # endregion
 
 # region Helpers
-    def is_playable(self, units: 'gs.UnitsCollection') -> bool:
+    def is_playable(self, units: 'gs.UnitsCollection', enemies: 'gs.UnitsCollection') -> bool:
         """Check if card is playable."""
-        return self.value.is_unit_value() or self.value.is_spell_value() or (self.value.is_item_value() and len(units.get_available_units()) > 0)
+        return self.value.is_unit_value() or (self.value.is_spell_value() and len(enemies.get_units()) > 0) or (self.value.is_item_value() and len(units.get_available_units()) > 0)
 # endregion
 
 # region Override

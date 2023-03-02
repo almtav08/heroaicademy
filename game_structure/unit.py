@@ -90,6 +90,33 @@ class Unit:
     def get_equipement(self) -> List['gs.Card']:
         """Get unit equipement."""
         return self.equipement
+    
+    def get_attack_equipement(self) -> List['gs.Card']:
+        """Get unit attack equipement."""
+        return [card for card in self.equipement if card.get_value() == gs.CardValue.RUNEMETAL and card.get_card_type() == gs.CardValue.SCROLL]
+    
+    def get_defense_equipement(self) -> List['gs.Card']:
+        """Get unit defense equipement."""
+        return [card for card in self.equipement if card.get_value() == gs.CardValue.DRAGONSCALE and card.get_card_type() == gs.CardValue.SHINING_HELM]
+    
+    def get_unique_equipement(self) -> List['gs.Card']:
+        """Get unit unique equipement."""
+        equipement = []
+        [equipement.append(card) for card in self.equipement if card not in equipement]
+        return equipement
+    
+    def get_bonus_attack(self, is_on_attack_tile = False) -> int:
+        dmg = self.power
+        if self.card.get_value() == gs.CardValue.CLERIC:
+            dmg = 0.5 * self.power
+        for card in self.get_attack_equipement():
+            if card.get_card_type() == gs.CardValue.SCROLL:
+                dmg += 0.1 * self.power
+            else:
+                dmg += 0.2 * self.power
+        if is_on_attack_tile:
+            dmg += 0.15 * self.power
+        return dmg
 # endregion
 
 # region Setters
@@ -103,12 +130,21 @@ class Unit:
 # endregion
 
 # region Helpers
-    def possible_moves(self, board_size: Tuple[int, int]) -> List[Tuple[int, int]]:
+    def can_attack(self, enemy: 'gs.UnitsCollection') -> bool:
+        """Check if the unit can attack an enemy unit."""
+        return len(enemy.get_units_in_range(self)) > 0
+    
+    def can_heal(self, units: 'gs.UnitsCollection') -> bool:
+        """Check if the unit can heal an ally unit."""
+        return len(units.get_units_in_range(self)) > 0 and self.card.get_value() == gs.CardValue.CLERIC
+
+    def possible_moves(self, board_size: Tuple[int, int], is_on_speed_tile = False, taken_positions: List[Tuple[int, int]] = []) -> List[Tuple[int, int]]:
         """Return a list of possible moves for the unit."""
         moves = []
-        for x in range(self.pos[0] - self.speed, self.pos[0] + self.speed + 1):
-            for y in range(self.pos[1] - self.speed, self.pos[1] + self.speed + 1):
-                if x >= 0 and x < board_size[0] and y >= 0 and y < board_size[1] and (x, y) != self.pos:
+        speed = self.speed if not is_on_speed_tile else self.speed + 1
+        for x in range(self.pos[0] - speed, self.pos[0] + speed + 1):
+            for y in range(self.pos[1] - speed, self.pos[1] + speed + 1):
+                if x >= 0 and x < board_size[0] and y >= 0 and y < board_size[1] and (x, y) != self.pos and (x, y) not in taken_positions:
                     moves.append((x, y))
         return moves
     
@@ -116,10 +152,17 @@ class Unit:
         """Check if the unit is in range of the other unit."""
         return other.get_range() >= abs(self.pos[0] - other.pos[0]) + abs(self.pos[1] - other.pos[1])
     
-    def attack_unit(self, other: 'Unit') -> None:
+    def attack_unit(self, other: 'Unit', is_on_attack_tile = False) -> None:
         """Attack other unit."""
-        damage = int(self.power * (100 - other.resistance) / 100)
-        other.set_hp(other.get_hp() - damage)
+        dmg = self.get_bonus_attack(is_on_attack_tile)
+        res = other.resistance
+        for card in other.get_defense_equipement():
+            if card.get_card_type() == gs.CardValue.SHINING_HELM:
+                res += 0.1 * other.resistance
+            else:
+                res += 0.2 * other.resistance
+        intake = int(dmg * (100 - res) / 100)
+        other.set_hp(other.get_hp() - intake)
 # endregion
 
 # region Override

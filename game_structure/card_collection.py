@@ -41,9 +41,9 @@ class CardCollection:
         """Get the number of cards in the collection."""
         return len(self.cards)
     
-    def get_playable_cards(self, units: 'gs.UnitsCollection') -> List['gs.Card']:
+    def get_playable_cards(self, units: 'gs.UnitsCollection', enemies: 'gs.UnitsCollection') -> List['gs.Card']:
         """Get all cards that can be played."""
-        return [card for card in self.cards if card.is_playable(units)]
+        return [card for card in self.cards if card.is_playable(units, enemies)]
 # endregion
 
 # region Helpers

@@ -61,29 +61,40 @@ class Observation:
 
     def is_action_valid(self, action: 'gs.Action') -> bool:
         """Checks if the given action is currently valid."""
+        units = self.player_0_units if self.current_turn == 0 else self.player_1_units
+        enemy_units = self.player_1_units if self.current_turn == 0 else self.player_0_units
+        cards = self.player_0_cards if self.current_turn == 0 else self.player_1_cards
+
+        if action is None and (len(units.get_available_units()) > 0 or len(enemy_units.get_available_units()) > 0):
+            return True
+
         if type(action.get_subject()) is gs.Unit:
-            units = self.player_0_units if self.current_turn == 0 else self.player_1_units
-            if action.get_subject() not in units.get_available_units():
+            unit = action.get_subject()
+            if unit not in units.get_available_units():
                 return False
             if action.get_unit() is None:
                 # Unit is moving
-                enemy_units = self.player_1_units if self.current_turn == 0 else self.player_0_units
-                return action.get_position() in action.get_subject().possible_moves(self.game_parameters.board_size) \
-                    and action.get_position() not in enemy_units.get_unit_positions()
+                units_positions = units.get_unit_positions()
+                units_positions.extend(enemy_units.get_unit_positions())
+                return action.get_position() in unit.possible_moves(self.game_parameters.board_size, self.board[unit.get_pos()] == gs.TileType.SPEED, units_positions)
             else:
                 # Unit is attacking or healing
-                units = self.player_0_units if self.current_turn == 0 else self.player_1_units
-                return action.get_unit() in units.get_units_in_range(action.get_subject())
+                return action.get_unit() in units.get_units_in_range(unit) or action.get_unit() in enemy_units.get_units_in_range(unit)
         else:
-            cards = self.player_0_cards if self.current_turn == 0 else self.player_1_cards
             if action.get_subject() not in cards.get_cards():
                 return False
-            if action.get_unit() is None:
+
+            if action.get_unit() is None and action.get_position() is None:
+                return True
+            if action.get_unit() is not None and action.get_position() is not None:
+                return False
+
+            elif action.get_unit() is None:
                 # Inferno spell or heal potion is used or unit is summoned
-                if action.get_subject().get_value() == gs.CardValue.INFERNO:
+                if action.get_subject().get_value().is_spell_value():
                     enemy_units = self.player_1_units if self.current_turn == 0 else self.player_0_units
                     return action.get_position() in enemy_units.get_unit_positions()
-                elif action.get_subject().get_value() == gs.CardValue.HEAL_POTION:
+                elif action.get_subject().get_value().is_item_value():
                     units = self.player_0_units if self.current_turn == 0 else self.player_1_units
                     return action.get_position() in units.get_unit_positions()
                 else:
@@ -95,7 +106,7 @@ class Observation:
             else:
                 # Equipment given to unit
                 units = self.player_0_units if self.current_turn == 0 else self.player_1_units
-                return action.get_unit().get_pos() in units.get_unit_positions()
+                return units.get_unit_in_position(action.get_unit().get_pos()) is not None
 
 # endregion
 
@@ -106,109 +117,89 @@ class Observation:
         units = self.player_0_units if self.current_turn == 0 else self.player_1_units
         cards = self.player_0_cards if self.current_turn == 0 else self.player_1_cards
         enemy_units = self.player_1_units if self.current_turn == 0 else self.player_0_units
+        units_positions = units.get_unit_positions()
+        units_positions.extend(enemy_units.get_unit_positions())
 
         for unit in units.get_available_units():
             if unit.get_card().get_value() == gs.CardValue.CLERIC:
                 for target in units.get_units_in_range(unit):
                     actions.append(gs.Action(unit.clone(), target.clone(), None))
-                for position in unit.possible_moves(self.game_parameters.board_size):
-                    actions.append(gs.Action(unit.clone(), None, deepcopy(position)))
-                    if position not in enemy_units.get_unit_positions():
-                        actions.append(gs.Action(unit.clone(), None, deepcopy(position)))
-            else:
-                for enemy in enemy_units.get_units_in_range(unit):
-                    actions.append(gs.Action(unit.clone(), enemy.clone(), None))
-                for position in unit.possible_moves(self.game_parameters.board_size):
-                    if position not in enemy_units.get_unit_positions():
-                        actions.append(gs.Action(unit.clone(), None, deepcopy(position)))
+            for enemy in enemy_units.get_units_in_range(unit):
+                actions.append(gs.Action(unit.clone(), enemy.clone(), None))
+            for position in unit.possible_moves(self.game_parameters.board_size, self.board[unit.get_pos()] == gs.TileType.SPEED, units_positions):
+                actions.append(gs.Action(unit.clone(), None, deepcopy(position)))
 
         for card in cards.get_cards():
-            actions.append(gs.Action(card.clone(), None, None))
-            if card.get_value() == gs.CardValue.INFERNO:
+            if not card.is_playable(units, enemy_units):
+                actions.append(gs.Action(card.clone(), None, None))
+            if card.get_value().is_spell_value():
                 for enemy in enemy_units.get_units():
                     actions.append(gs.Action(card.clone(), None, deepcopy(enemy.get_pos())))
-            elif card.get_value() == gs.CardValue.HEAL_POTION:
+            elif card.get_value().is_item_value() and card.get_value() == gs.CardValue.HEAL_POTION:
                 for unit in units.get_available_units():
                     actions.append(gs.Action(card.clone(), None, deepcopy(unit.get_pos())))
-            elif card.get_value().is_unit_value():
-                player_1 = True if self.current_turn == 1 else False
-                for position in units.get_avalible_positions_for_spawn(player_1, self.game_parameters.board_size):
-                    if position not in enemy_units.get_unit_positions():
-                        actions.append(gs.Action(card.clone(), None, deepcopy(position)))
-            else:
+            elif card.get_value().is_item_value() and not card.get_value() == gs.CardValue.HEAL_POTION:
                 for unit in units.get_available_units():
                     actions.append(gs.Action(card.clone(), unit.clone(), None))
-        
+            else:
+                player_1 = True if self.current_turn == 1 else False
+                spawns = units.get_avalible_positions_for_spawn(player_1, self.game_parameters.board_size, enemy_units.get_unit_positions())
+                for position in spawns:
+                    actions.append(gs.Action(card.clone(), None, deepcopy(position)))
         return actions
-
+    
     def get_random_action(self) -> 'gs.Action':
         """Gets a random action that is currently valid."""
         units = self.player_0_units if self.current_turn == 0 else self.player_1_units
         cards = self.player_0_cards if self.current_turn == 0 else self.player_1_cards
-        move = bool(random.getrandbits(1)) and len(units.get_available_units()) > 0
-        if not move:
-            # Play with a card
-            card = random.choice(cards.get_cards())
+        enemy_units = self.player_1_units if self.current_turn == 0 else self.player_0_units
+        
+        # Check possibilities for a unit to use it
+        playable_units = units.get_playable_units(units, enemy_units, self.game_parameters.board_size, self.board)
+        use_unit = len(playable_units) > 0
+        use_card = len(cards.get_cards()) > 0
 
-            discard = bool(random.getrandbits(1))
-            if discard:
-                return gs.Action(card.clone(), None, None)
-            
-            if card.get_value() == gs.CardValue.INFERNO:
-                enemy_units = self.player_1_units if self.current_turn == 0 else self.player_0_units
-                enemy = random.choice(enemy_units.get_units())
-                return gs.Action(card.clone(), None, deepcopy(enemy.get_pos()))
-            elif card.get_value() == gs.CardValue.HEAL_POTION:
-                units = self.player_0_units if self.current_turn == 0 else self.player_1_units
-                unit = random.choice(units.get_units())
-                return gs.Action(card.clone(), None, deepcopy(unit.get_pos()))
-            elif card.get_value().is_unit_value():
-                units = self.player_0_units if self.current_turn == 0 else self.player_1_units
-                player_1 = True if self.current_turn == 1 else False
-                spawns = units.get_avalible_positions_for_spawn(player_1, self.game_parameters.board_size)
-                position = random.choice(spawns)
-                enemy_units = self.player_1_units if self.current_turn == 0 else self.player_0_units
-                while position in enemy_units.get_unit_positions():
-                    position = random.choice(spawns)
-                return gs.Action(card.clone(), None, deepcopy(position))
-            else:
-                units = self.player_0_units if self.current_turn == 0 else self.player_1_units
-                unit = random.choice(units.get_units())
-                return gs.Action(card.clone(), unit.clone(), None)
-        else:
+        if not use_unit and not use_card:
+            return None
+        
+        if use_unit and use_card:
+            use_unit = bool(random.getrandbits(1))
+
+        if use_unit:
             # Play with a unit
-            unit = random.choice(units.get_available_units())
-            if unit.get_card().get_value() == gs.CardValue.CLERIC:
-                move = bool(random.getrandbits(1))
-                if not move:
-                    # No move, heal
-                    units = self.player_0_units if self.current_turn == 0 else self.player_1_units
-                    target = random.choice(units.get_units_in_range(unit))
-                    return gs.Action(unit.clone(), target.clone(), None)
-                else:
-                # Move
-                    moves = unit.possible_moves(self.game_parameters.board_size)
-                    position = random.choice(moves)
-                    enemy_units = self.player_1_units if self.current_turn == 0 else self.player_0_units
-                    while position in enemy_units.get_unit_positions():
-                        position = random.choice(moves)
-                    return gs.Action(unit.clone(), None, deepcopy(position))
+            option = random.choice(playable_units)
+            possible_actions = []
+            if len(option[1]) > 0:
+                possible_actions.append('move')
+            if option[2]:
+                possible_actions.append('attack')
+            if option[3]:
+                possible_actions.append('heal')
+
+            action = random.choice(possible_actions)
+            if action == 'move':
+                return gs.Action(option[0].clone(), None, deepcopy(random.choice(option[1])))
+            elif action == 'attack':
+                return gs.Action(option[0].clone(), random.choice(enemy_units.get_units_in_range(option[0].clone())).clone(), None)
             else:
-                move = bool(random.getrandbits(1))
-                enemy_units = self.player_1_units if self.current_turn == 0 else self.player_0_units
-                enemies_in_range = enemy_units.get_units_in_range(unit)
-                if not move and len(enemies_in_range) > 0:
-                    # No move, attack
-                    target = random.choice(enemies_in_range)
-                    return gs.Action(unit.clone(), target.clone(), None)
-                else:
-                # Move
-                    moves = unit.possible_moves(self.game_parameters.board_size)
-                    position = random.choice(moves)
-                    enemy_units = self.player_1_units if self.current_turn == 0 else self.player_0_units
-                    while position in enemy_units.get_unit_positions():
-                        position = random.choice(moves)
-                    return gs.Action(unit.clone(), None, deepcopy(position))
+                return gs.Action(option[0].clone(), random.choice(units.get_units_in_range(option[0].clone())).clone(), None)
+        else:
+            # Play with a card
+            avaliable_cards = cards.get_playable_cards(units, enemy_units)
+            if len(avaliable_cards) == 0:
+                return gs.Action(random.choice(cards.get_cards()).clone(), None, None)
+            card = random.choice(avaliable_cards)
+            
+            if card.get_value().is_spell_value():
+                return gs.Action(card.clone(), None, deepcopy(random.choice(enemy_units.get_units()).get_pos()))
+            elif card.get_value().is_item_value() and card.get_value() == gs.CardValue.HEAL_POTION:
+                return gs.Action(card.clone(), None, deepcopy(random.choice(units.get_available_units()).get_pos()))
+            elif card.get_value().is_item_value() and not card.get_value() == gs.CardValue.HEAL_POTION:
+                return gs.Action(card.clone(), random.choice(units.get_available_units()).clone(), None)
+            else:
+                player_1 = True if self.current_turn == 1 else False
+                spawns = units.get_avalible_positions_for_spawn(player_1, self.game_parameters.board_size, enemy_units.get_unit_positions())
+                return gs.Action(card.clone(), None, deepcopy(random.choice(spawns)))
 # endregion
 
 #region Override

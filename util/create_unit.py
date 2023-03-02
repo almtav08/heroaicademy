@@ -8,7 +8,7 @@ def create(card: 'gs.Card', position: Tuple[int, int]) -> 'gs.Unit':
     elif card.get_value() == gs.CardValue.KNIGHT:
         return gs.Unit(card.clone(), 1000, 1000, 1, 250, 1, 20, deepcopy(position), [])
     elif card.get_value() == gs.CardValue.CLERIC:
-        return gs.Unit(card.clone(), 600, 600, 1, 150, 2, 0, deepcopy(position), [])
+        return gs.Unit(card.clone(), 600, 600, 1, 200, 2, 0, deepcopy(position), [])
     elif card.get_value() == gs.CardValue.WIZARD:
         return gs.Unit(card.clone(), 800, 800, 2, 200, 2, 10, deepcopy(position), [])
     elif card.get_value() == gs.CardValue.NINJA:
