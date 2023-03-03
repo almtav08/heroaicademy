@@ -81,7 +81,7 @@ class Game:
                 except func_timeout.FunctionTimedOut:
                     if verbose:
                         print("Too much time thinking. A random action was selected!")
-                    action = self.random_action(observation)
+                    action = self.think(player, observation, budget)
             else:
                 action = self.think(player, observation, budget)
 

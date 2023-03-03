@@ -18,7 +18,7 @@ class OEPlayer(Player):
 # region Methods
     def think(self, observation: "gs.Observation", budget: float) -> "gs.Action":
         """Computes a list of actions for a complete turn using the Online Evolution algorithm and returns them in order each time it's called during the turn."""
-        if observation.action_points_left == observation.game_parameters.action_points_per_turn:
+        if observation.action_points_left == observation.game_parameters.action_points_per_turn and len(self.turn) > 0:
             self.turn.clear()
             self.compute_turn(observation, budget)
         if len(self.turn) == 0:

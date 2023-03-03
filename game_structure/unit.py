@@ -177,4 +177,10 @@ class Unit:
             #f"Pos: {self.pos}\n"
             #f"Equipement: {self.equipement}"
         )
+    
+    def __eq__(self, other: 'Unit') -> bool:
+        """Check if two units are equal."""
+        return self.card == other.card and self.hp == other.hp and self.max_hp == other.max_hp and self.speed == other.speed \
+            and self.power == other.power and self.range == other.range and self.resistance == other.resistance and self.pos == other.pos \
+            and self.equipement == other.equipement
 # endregion

@@ -14,8 +14,6 @@ class Observation:
             self.player_1_score = game_state.player_1_score
             self.player_0_deck = game_state.player_0_deck.clone()
             self.player_1_deck = game_state.player_1_deck.clone()
-            self.player_0_discard = game_state.player_0_discard.clone()
-            self.player_1_discard = game_state.player_1_discard.clone()
             self.player_0_cards = game_state.player_0_cards.clone()
             self.player_1_cards = game_state.player_1_cards.clone()
             self.player_0_units = game_state.player_0_units.clone()
@@ -34,8 +32,6 @@ class Observation:
         new_observation.player_1_score = self.player_1_score
         new_observation.player_0_deck = self.player_0_deck.clone()
         new_observation.player_1_deck = self.player_1_deck.clone()
-        new_observation.player_0_discard = self.player_0_discard.clone()
-        new_observation.player_1_discard = self.player_1_discard.clone()
         new_observation.player_0_cards = self.player_0_cards.clone()
         new_observation.player_1_cards = self.player_1_cards.clone()
         new_observation.player_0_units = self.player_0_units.clone()
@@ -52,8 +48,6 @@ class Observation:
         other.player_1_score = self.player_1_score
         other.player_0_deck = self.player_0_deck.clone()
         other.player_1_deck = self.player_1_deck.clone()
-        other.player_0_discard = self.player_0_discard.clone()
-        other.player_1_discard = self.player_1_discard.clone()
         other.player_0_cards = self.player_0_cards.clone()
         other.player_1_cards = self.player_1_cards.clone()
         other.player_0_units = self.player_0_units.clone()
@@ -67,6 +61,8 @@ class Observation:
 
         if action is None and (len(units.get_available_units()) > 0 or len(enemy_units.get_available_units()) > 0):
             return True
+        if action.get_subject() is None:
+            return False
 
         if type(action.get_subject()) is gs.Unit:
             unit = action.get_subject()
@@ -83,12 +79,10 @@ class Observation:
         else:
             if action.get_subject() not in cards.get_cards():
                 return False
-
             if action.get_unit() is None and action.get_position() is None:
                 return True
             if action.get_unit() is not None and action.get_position() is not None:
                 return False
-
             elif action.get_unit() is None:
                 # Inferno spell or heal potion is used or unit is summoned
                 if action.get_subject().get_value().is_spell_value():
@@ -132,7 +126,7 @@ class Observation:
         for card in cards.get_cards():
             if not card.is_playable(units, enemy_units):
                 actions.append(gs.Action(card.clone(), None, None))
-            if card.get_value().is_spell_value():
+            elif card.get_value().is_spell_value():
                 for enemy in enemy_units.get_units():
                     actions.append(gs.Action(card.clone(), None, deepcopy(enemy.get_pos())))
             elif card.get_value().is_item_value() and card.get_value() == gs.CardValue.HEAL_POTION:
@@ -191,9 +185,9 @@ class Observation:
             card = random.choice(avaliable_cards)
             
             if card.get_value().is_spell_value():
-                return gs.Action(card.clone(), None, deepcopy(random.choice(enemy_units.get_units()).get_pos()))
+                return gs.Action(card.clone(), None, deepcopy(random.choice(enemy_units.get_units()).clone().get_pos()))
             elif card.get_value().is_item_value() and card.get_value() == gs.CardValue.HEAL_POTION:
-                return gs.Action(card.clone(), None, deepcopy(random.choice(units.get_available_units()).get_pos()))
+                return gs.Action(card.clone(), None, deepcopy(random.choice(units.get_available_units()).clone().get_pos()))
             elif card.get_value().is_item_value() and not card.get_value() == gs.CardValue.HEAL_POTION:
                 return gs.Action(card.clone(), random.choice(units.get_available_units()).clone(), None)
             else:

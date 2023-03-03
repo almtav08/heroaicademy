@@ -45,4 +45,7 @@ class Action:
     def __str__(self) -> str:
         """Return string representation of action."""
         return f"Action(subject={self.subject!s}, option={self.unit!s}, position={self.position})"
+    
+    def __eq__(self, __o: object) -> bool:
+        return self.subject == __o.subject and self.unit == __o.unit and self.position == __o.position
 # endregion

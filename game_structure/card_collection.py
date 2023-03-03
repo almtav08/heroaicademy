@@ -44,6 +44,10 @@ class CardCollection:
     def get_playable_cards(self, units: 'gs.UnitsCollection', enemies: 'gs.UnitsCollection') -> List['gs.Card']:
         """Get all cards that can be played."""
         return [card for card in self.cards if card.is_playable(units, enemies)]
+    
+    def get_unit_cards(self) -> List['gs.Card']:
+        """Get all unit cards."""
+        return [card for card in self.cards if card.get_value().is_unit_value()]
 # endregion
 
 # region Helpers

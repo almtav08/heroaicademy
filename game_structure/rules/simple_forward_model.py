@@ -92,31 +92,34 @@ class SimpleForwardModel(rl.ForwardModel):
             game_state.action_points_left = game_state.game_parameters.action_points_per_turn
 
     def is_terminal(self, game_state: Union['gs.GameState', 'gs.Observation']) -> bool:
+        if self.current_player_cant_play(game_state) and self.next_player_has_units(game_state):
+            if game_state.current_turn == 0:
+                game_state.player_1_score += game_state.player_0_score * 2
+            else:
+                game_state.player_0_score += game_state.player_1_score * 2
+
         return not game_state.player_0_units.crystals_alive() or not game_state.player_1_units.crystals_alive() \
-            or (game_state.player_0_units.get_units_alive() == 0 and game_state.player_0_cards.is_empty() \
-            and game_state.player_1_units.get_units_alive() == 0 and game_state.player_1_cards.is_empty())
+            or self.current_player_cant_play(game_state)
 
     def is_turn_finished(self, game_state: Union['gs.GameState', 'gs.Observation']) -> bool:
         return game_state.action_points_left == 0
 # endregion
 
 # region Helpers
-    #def update_score(self, game_state: Union['gs.GameState', 'gs.Observation']) -> None:
-    #    """Update score."""
-    #    if game_state.current_turn == 0:
-    #        current_hp = sum(map(lambda unit: unit.get_hp(), game_state.player_0_units.get_units()))
-    #        enemy_hp = sum(map(lambda unit: unit.get_hp(), game_state.player_1_units.get_units()))
-    #        score = max((int((current_hp - enemy_hp) / 100)), 0)
-    #        playable_cards = len(game_state.player_0_cards.get_playable_cards(game_state.player_0_units))
-    #        score += (game_state.game_parameters.cards_on_hand - playable_cards) * 10
-    #        game_state.player_0_score += score
-    #    else:
-    #        current_hp = sum(map(lambda unit: unit.get_hp(), game_state.player_1_units.get_units()))
-    #        enemy_hp = sum(map(lambda unit: unit.get_hp(), game_state.player_0_units.get_units()))
-    #        score = max((int((current_hp - enemy_hp) / 100)), 0)
-    #        playable_cards = len(game_state.player_1_cards.get_playable_cards(game_state.player_1_units))
-    #        score += (game_state.game_parameters.cards_on_hand - playable_cards) * 10
-    #        game_state.player_1_score += score
+    def current_player_cant_play(self, game_state: Union['gs.GameState', 'gs.Observation']) -> bool:
+        """Return if the player can't play."""
+        current_units = game_state.player_0_units if game_state.current_turn == 0 else game_state.player_1_units
+        current_cards = game_state.player_0_cards if game_state.current_turn == 0 else game_state.player_1_cards
+
+        return current_units.get_units_alive() == 0 and current_cards.is_empty()
+    
+    def next_player_has_units(self, game_state: Union['gs.GameState', 'gs.Observation']) -> bool:
+        """Return if the player can't play."""
+        next_units = game_state.player_1_units if game_state.current_turn == 0 else game_state.player_0_units
+        next_cards = game_state.player_1_cards if game_state.current_turn == 0 else game_state.player_0_cards
+        next_deck = game_state.player_1_deck if game_state.current_turn == 0 else game_state.player_0_deck
+
+        return next_units.get_units_alive() > 0 or next_cards.get_unit_cards() > 0 or next_deck.get_unit_cards() > 0
 
     def update_score(self, game_state: Union['gs.GameState', 'gs.Observation']) -> None:
         """Update score."""

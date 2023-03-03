@@ -11,5 +11,5 @@ def start_game() -> Tuple['Game', List[Player]]:
     parameters.forward_model = forward_model
     players = [MCTSPlayer(SimpleHeuristic(), 8), OEPlayer(SimpleHeuristic(), 125, 0.15, 0.15)]
     game = Game(parameters)
-    budget = 2
+    budget = 6
     return (game, players, budget)
